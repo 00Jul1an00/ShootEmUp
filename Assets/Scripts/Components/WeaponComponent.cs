@@ -6,15 +6,27 @@ namespace ShootEmUp
     {
         public Vector2 Position
         {
-            get { return this.firePoint.position; }
+            get { return this._firePoint.position; }
         }
 
         public Quaternion Rotation
         {
-            get { return this.firePoint.rotation; }
+            get { return this._firePoint.rotation; }
         }
 
         [SerializeField]
-        private Transform firePoint;
+        private Transform _firePoint;
+
+        private BulletSystem _bulletSystem;
+
+        private void Awake()
+        {
+            _bulletSystem = FindObjectOfType<BulletSystem>();
+        }
+
+        public void Fire(Args bulletArgs)
+        {
+            _bulletSystem.FlyBulletByArgs(bulletArgs);
+        }
     }
 }

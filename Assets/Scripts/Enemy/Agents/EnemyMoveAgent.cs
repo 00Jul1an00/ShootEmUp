@@ -29,6 +29,7 @@ namespace ShootEmUp
             }
             
             var vector = this.destination - (Vector2) this.transform.position;
+            
             if (vector.magnitude <= 0.25f)
             {
                 this.isReached = true;

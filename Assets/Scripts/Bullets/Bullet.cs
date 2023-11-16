@@ -7,38 +7,48 @@ namespace ShootEmUp
     {
         public event Action<Bullet, Collision2D> OnCollisionEntered;
 
-        [NonSerialized] public bool isPlayer;
-        [NonSerialized] public int damage;
+        public bool IsPlayer { get; private set; }
+        public int Damage { get; private set; }
 
         [SerializeField]
-        private new Rigidbody2D rigidbody2D;
+        private Rigidbody2D _rigidbody2D;
 
         [SerializeField]
-        private SpriteRenderer spriteRenderer;
+        private SpriteRenderer _spriteRenderer;
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
             this.OnCollisionEntered?.Invoke(this, collision);
         }
 
-        public void SetVelocity(Vector2 velocity)
+        public void Init(Args args)
         {
-            this.rigidbody2D.velocity = velocity;
+            IsPlayer = args.isPlayer;
+            Damage = args.damage;
+            SetVelocity(args.velocity);
+            SetPhysicsLayer(args.physicsLayer);
+            SetPosition(args.position);
+            SetColor(args.color);
         }
 
-        public void SetPhysicsLayer(int physicsLayer)
+        private void SetVelocity(Vector2 velocity)
+        {
+            this._rigidbody2D.velocity = velocity;
+        }
+
+        private void SetPhysicsLayer(int physicsLayer)
         {
             this.gameObject.layer = physicsLayer;
         }
 
-        public void SetPosition(Vector3 position)
+        private void SetPosition(Vector3 position)
         {
             this.transform.position = position;
         }
 
-        public void SetColor(Color color)
+        private void SetColor(Color color)
         {
-            this.spriteRenderer.color = color;
+            this._spriteRenderer.color = color;
         }
     }
 }
