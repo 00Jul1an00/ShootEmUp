@@ -8,7 +8,10 @@ namespace GameFlow
     {
         [Header("TestHelper")]
         [SerializeField] private HelpersButtons _helpersButtons;
+        
+        [Space(20)]
         [SerializeField] private GameManager _gameManager;
+        [SerializeField] private OnCharacterKilledObserver _onCharacterKilledObserver;
 
         private List<IAwake> _awaikebles = new();
         private List<IStart> _startable = new();
@@ -30,6 +33,7 @@ namespace GameFlow
 
             _helpersButtons.AddPauseButtonListiner(Pause);
             _helpersButtons.AddResumeButtonListiner(Resume);
+            _onCharacterKilledObserver.PlayerDied += GameFinished;
             FillupLists(transform);
         }
 
@@ -67,6 +71,11 @@ namespace GameFlow
                 if (child.childCount > 0)
                     FillupLists(child);
             }
+        }
+
+        private void OnDestroy()
+        {
+            _onCharacterKilledObserver.PlayerDied -= GameFinished;
         }
 
         private void Awake()

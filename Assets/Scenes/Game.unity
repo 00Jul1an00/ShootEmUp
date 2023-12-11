@@ -1617,6 +1617,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _helpersButtons: {fileID: 1476709121}
   _gameManager: {fileID: 3951702117947426123}
+  _onCharacterKilledObserver: {fileID: 1714821403}
 --- !u!4 &1798350307
 Transform:
   m_ObjectHideFlags: 0

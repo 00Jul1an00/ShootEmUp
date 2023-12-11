@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace ShootEmUp
@@ -6,6 +7,8 @@ namespace ShootEmUp
     {
         [SerializeField] private HitPointsComponent _characterHitPoints;
         [SerializeField] private GameManager _gameManager;
+
+        public event Action PlayerDied;
 
         private void OnEnable()
         {
@@ -19,7 +22,7 @@ namespace ShootEmUp
 
         private void OnHpIsEmpty(GameObject character)
         {
-            _gameManager.OnFinishGame();
+            PlayerDied?.Invoke();
         }
     }
 }
