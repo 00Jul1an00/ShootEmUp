@@ -1,43 +1,55 @@
 using UnityEngine;
+using GameFlow;
 
 namespace ShootEmUp
 {
-    public sealed class EnemyMoveAgent : MonoBehaviour
+    public sealed class EnemyMoveAgent : MonoBehaviour, IFixedUpdate, IPause, IResume
     {
         public bool IsReached
         {
-            get { return this.isReached; }
+            get { return _isReached; }
         }
 
-        [SerializeField] private MoveComponent moveComponent;
+        [SerializeField] private MoveComponent _moveComponent;
 
-        private Vector2 destination;
+        private Vector2 _destination;
 
-        private bool isReached;
+        private bool _isReached;
+        private bool _isPaused;
 
         public void SetDestination(Vector2 endPoint)
         {
-            this.destination = endPoint;
-            this.isReached = false;
+            _destination = endPoint;
+            _isReached = false;
         }
 
-        private void FixedUpdate()
+        public void FixedUpdateObj()
         {
-            if (this.isReached)
+            if (_isReached || _isPaused)
             {
                 return;
             }
-            
-            var vector = this.destination - (Vector2) this.transform.position;
-            
+
+            var vector = _destination - (Vector2)transform.position;
+
             if (vector.magnitude <= 0.25f)
             {
-                this.isReached = true;
+                _isReached = true;
                 return;
             }
 
             var direction = vector.normalized * Time.fixedDeltaTime;
-            this.moveComponent.MoveByRigidbodyVelocity(direction);
+            _moveComponent.MoveByRigidbodyVelocity(direction);
+        }
+
+        public void OnPause()
+        {
+            _isPaused = true;
+        }
+
+        public void OnResume()
+        {
+            _isPaused = false;
         }
     }
 }

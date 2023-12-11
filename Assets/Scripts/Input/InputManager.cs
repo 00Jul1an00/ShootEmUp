@@ -1,13 +1,14 @@
+using GameFlow;
 using UnityEngine;
 
 namespace ShootEmUp
 {
-    public sealed class InputManager : MonoBehaviour
+    public sealed class InputManager : MonoBehaviour, IUpdate
     {
         public float HorizontalDirection { get; private set; }
         public event System.Action FireRequest;
 
-        private void Update()
+        public void UpdateObj()
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
@@ -16,15 +17,15 @@ namespace ShootEmUp
 
             if (Input.GetKey(KeyCode.LeftArrow))
             {
-                this.HorizontalDirection = -1;
+                HorizontalDirection = -1;
             }
             else if (Input.GetKey(KeyCode.RightArrow))
             {
-                this.HorizontalDirection = 1;
+                HorizontalDirection = 1;
             }
             else
             {
-                this.HorizontalDirection = 0;
+                HorizontalDirection = 0;
             }
         }
     }

@@ -1,81 +1,94 @@
 using System.Collections.Generic;
 using UnityEngine;
+using GameFlow;
 
 namespace ShootEmUp
 {
-    public sealed class BulletSystem : MonoBehaviour
+    public sealed class BulletSystem : MonoBehaviour, IAwake, IFixedUpdate, IPause, IResume
     {
         [SerializeField]
         private int _initialCount = 50;
-        
+
         [SerializeField] private Transform _container;
         [SerializeField] private Bullet _prefab;
         [SerializeField] private Transform _worldTransform;
         [SerializeField] private LevelBounds _levelBounds;
+        [SerializeField] private GameFlowManager _gameFlowManager;
 
-        private readonly Queue<Bullet> m_bulletPool = new();
-        private readonly HashSet<Bullet> m_activeBullets = new();
-        private readonly List<Bullet> m_cache = new();
-        
-        private void Awake()
+        private bool _isPaused;
+
+        private readonly Queue<Bullet> _bulletPool = new();
+        private readonly HashSet<Bullet> _activeBullets = new();
+        private readonly List<Bullet> _cache = new();
+
+        public void AwakeObj()
         {
-            for (var i = 0; i < this._initialCount; i++)
+            for (var i = 0; i < _initialCount; i++)
             {
-                var bullet = Instantiate(this._prefab, this._container);
-                this.m_bulletPool.Enqueue(bullet);
+                var bullet = Instantiate(_prefab, _container);
+                _bulletPool.Enqueue(bullet);
             }
         }
-        
-        private void FixedUpdate()
-        {
-            this.m_cache.Clear();
-            this.m_cache.AddRange(this.m_activeBullets);
 
-            for (int i = 0, count = this.m_cache.Count; i < count; i++)
+        public void FixedUpdateObj()
+        {
+            if (_isPaused)
+                return;
+
+            _cache.Clear();
+            _cache.AddRange(_activeBullets);
+
+            for (int i = 0, count = _cache.Count; i < count; i++)
             {
-                var bullet = this.m_cache[i];
-                if (!this._levelBounds.InBounds(bullet.transform.position))
+                var bullet = _cache[i];
+                if (!_levelBounds.InBounds(bullet.transform.position))
                 {
-                    this.RemoveBullet(bullet);
+                    RemoveBullet(bullet);
                 }
             }
         }
 
         public void FlyBulletByArgs(Args args)
         {
-            if (this.m_bulletPool.TryDequeue(out var bullet))
+            if (_isPaused)
             {
-                bullet.transform.SetParent(this._worldTransform);
+                return;
+            }
+
+            if (_bulletPool.TryDequeue(out var bullet))
+            {
+                bullet.transform.SetParent(_worldTransform);
             }
             else
             {
-                bullet = Instantiate(this._prefab, this._worldTransform);
+                bullet = Instantiate(_prefab, _worldTransform);
             }
 
+            _gameFlowManager.AddPausebleObj(bullet);
             bullet.Init(args);
-            
-            if (this.m_activeBullets.Add(bullet))
+
+            if (_activeBullets.Add(bullet))
             {
-                bullet.OnCollisionEntered += this.OnBulletCollision;
+                bullet.OnCollisionEntered += OnBulletCollision;
             }
         }
-        
+
         private void OnBulletCollision(Bullet bullet, Collision2D collision)
         {
             DealDamage(bullet, collision.gameObject);
-            this.RemoveBullet(bullet);
+            RemoveBullet(bullet);
         }
 
         private void RemoveBullet(Bullet bullet)
         {
-            if (this.m_activeBullets.Remove(bullet))
+            if (_activeBullets.Remove(bullet))
             {
-                bullet.OnCollisionEntered -= this.OnBulletCollision;
-                bullet.transform.SetParent(this._container);
-                this.m_bulletPool.Enqueue(bullet);
+                bullet.OnCollisionEntered -= OnBulletCollision;
+                bullet.transform.SetParent(_container);
+                _bulletPool.Enqueue(bullet);
             }
         }
-        
+
         private void DealDamage(Bullet bullet, GameObject other)
         {
             if (!other.TryGetComponent(out TeamComponent team))
@@ -92,6 +105,16 @@ namespace ShootEmUp
             {
                 hitPoints.TakeDamage(bullet.Damage);
             }
+        }
+
+        public void OnPause()
+        {
+            _isPaused = true;
+        }
+
+        public void OnResume()
+        {
+            _isPaused = false;
         }
     }
 }

@@ -1,9 +1,10 @@
 using System;
 using UnityEngine;
+using GameFlow;
 
 namespace ShootEmUp
 {
-    public sealed class Bullet : MonoBehaviour
+    public sealed class Bullet : MonoBehaviour, IPause, IResume
     {
         public event Action<Bullet, Collision2D> OnCollisionEntered;
 
@@ -16,39 +17,52 @@ namespace ShootEmUp
         [SerializeField]
         private SpriteRenderer _spriteRenderer;
 
+        private Vector2 _velocity;
+
         private void OnCollisionEnter2D(Collision2D collision)
         {
-            this.OnCollisionEntered?.Invoke(this, collision);
+            OnCollisionEntered?.Invoke(this, collision);
         }
 
         public void Init(Args args)
         {
             IsPlayer = args.isPlayer;
-            Damage = args.damage;
-            SetVelocity(args.velocity);
-            SetPhysicsLayer(args.physicsLayer);
-            SetPosition(args.position);
-            SetColor(args.color);
+            Damage = args.Damage;
+            SetVelocity(args.Velocity);
+            SetPhysicsLayer(args.PhysicsLayer);
+            SetPosition(args.Position);
+            SetColor(args.Color);
         }
 
         private void SetVelocity(Vector2 velocity)
         {
-            this._rigidbody2D.velocity = velocity;
+            _velocity = velocity;
+            _rigidbody2D.velocity = _velocity;
         }
 
         private void SetPhysicsLayer(int physicsLayer)
         {
-            this.gameObject.layer = physicsLayer;
+            gameObject.layer = physicsLayer;
         }
 
         private void SetPosition(Vector3 position)
         {
-            this.transform.position = position;
+            transform.position = position;
         }
 
         private void SetColor(Color color)
         {
-            this._spriteRenderer.color = color;
+            _spriteRenderer.color = color;
+        }
+
+        public void OnResume()
+        {
+            _rigidbody2D.velocity = _velocity;
+        }
+
+        public void OnPause()
+        {
+            _rigidbody2D.velocity = Vector2.zero;
         }
     }
 }

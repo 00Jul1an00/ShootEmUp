@@ -19,7 +19,7 @@ namespace ShootEmUp
 
         private void OnHpIsEmpty(GameObject character)
         {
-            _gameManager.FinishGame();
+            _gameManager.OnFinishGame();
         }
     }
 }

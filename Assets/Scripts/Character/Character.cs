@@ -18,11 +18,11 @@ namespace ShootEmUp
             _weapon.Fire(new Args
             {
                 isPlayer = true,
-                physicsLayer = (int)_bulletConfig.physicsLayer,
-                color = _bulletConfig.color,
-                damage = _bulletConfig.damage,
-                position = _weapon.Position,
-                velocity = _weapon.Rotation * Vector3.up * _bulletConfig.speed
+                PhysicsLayer = (int)_bulletConfig.PhysicsLayer,
+                Color = _bulletConfig.Color,
+                Damage = _bulletConfig.Damage,
+                Position = _weapon.Position,
+                Velocity = _weapon.Rotation * Vector3.up * _bulletConfig.Speed
             });
         }
     }
