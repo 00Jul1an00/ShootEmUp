@@ -17,17 +17,12 @@ namespace ShootEmUp
 
         private bool _isPaused;
 
-        private readonly Queue<Bullet> _bulletPool = new();
-        private readonly HashSet<Bullet> _activeBullets = new();
+        private BulletPool _bulletPool;
         private readonly List<Bullet> _cache = new();
 
         public void AwakeObj()
         {
-            for (var i = 0; i < _initialCount; i++)
-            {
-                var bullet = Instantiate(_prefab, _container);
-                _bulletPool.Enqueue(bullet);
-            }
+            _bulletPool = new(_initialCount, _prefab, _container, _worldTransform, OnBulletCollision, _gameFlowManager);
         }
 
         public void FixedUpdateObj()
@@ -36,14 +31,14 @@ namespace ShootEmUp
                 return;
 
             _cache.Clear();
-            _cache.AddRange(_activeBullets);
+            _cache.AddRange(_bulletPool.GetBullets());
 
             for (int i = 0, count = _cache.Count; i < count; i++)
             {
                 var bullet = _cache[i];
                 if (!_levelBounds.InBounds(bullet.transform.position))
                 {
-                    RemoveBullet(bullet);
+                    _bulletPool.DespawnBullet(bullet);
                 }
             }
         }
@@ -55,38 +50,13 @@ namespace ShootEmUp
                 return;
             }
 
-            if (_bulletPool.TryDequeue(out var bullet))
-            {
-                bullet.transform.SetParent(_worldTransform);
-            }
-            else
-            {
-                bullet = Instantiate(_prefab, _worldTransform);
-            }
-
-            _gameFlowManager.AddPausebleObj(bullet);
-            bullet.Init(args);
-
-            if (_activeBullets.Add(bullet))
-            {
-                bullet.OnCollisionEntered += OnBulletCollision;
-            }
+            _bulletPool.SpawnBullet(args);
         }
 
         private void OnBulletCollision(Bullet bullet, Collision2D collision)
         {
             DealDamage(bullet, collision.gameObject);
-            RemoveBullet(bullet);
-        }
-
-        private void RemoveBullet(Bullet bullet)
-        {
-            if (_activeBullets.Remove(bullet))
-            {
-                bullet.OnCollisionEntered -= OnBulletCollision;
-                bullet.transform.SetParent(_container);
-                _bulletPool.Enqueue(bullet);
-            }
+            _bulletPool.DespawnBullet(bullet);
         }
 
         private void DealDamage(Bullet bullet, GameObject other)
