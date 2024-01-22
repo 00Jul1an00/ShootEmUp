@@ -4,13 +4,20 @@ using System.Collections;
 
 namespace ShootEmUp
 {
-    public sealed class GameManager : MonoBehaviour, IFinishGame, IAwake
+    public sealed class GameManager : IFinishGame, IAwake
     {
+        private readonly ICoroutineStarter _coroutiner;
+        
         private const float SECONDS_BEFORE_START = 3;
+
+        public GameManager(ICoroutineStarter coroutineStarter)
+        {
+            _coroutiner = coroutineStarter;
+        }
 
         public void StartGame()
         {
-            StartCoroutine(StartGameCoroutine());
+            _coroutiner.CoroutineStarter.StartCoroutine(StartGameCoroutine());
         }
 
         public void OnFinishGame()

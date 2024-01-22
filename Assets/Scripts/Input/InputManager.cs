@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public sealed class InputManager : MonoBehaviour, IUpdate
+    public sealed class InputManager : IUpdate
     {
         public float HorizontalDirection { get; private set; }
         public event System.Action FireRequest;

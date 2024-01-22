@@ -4,45 +4,45 @@ using GameFlow;
 
 namespace ShootEmUp
 {
-    public sealed class EnemyPool : MonoBehaviour, IAwake, IPause, IResume
+    public sealed class EnemyPool : IAwake, IPause, IResume
     {
-        [SerializeField]
-        private GameFlowManager _gameFlowManager;
-
-        [Header("Spawn")]
-        [SerializeField]
-        private EnemyPositions _enemyPositions;
-
-        [SerializeField]
-        private GameObject _character;
-
-        [SerializeField]
-        private Transform _worldTransform;
-
-        [Header("Pool")]
-        [SerializeField]
-        private Transform _container;
-
-        [SerializeField]
-        private GameObject _prefab;
-
-        [SerializeField] 
-        private int _enemyCount = 7;
+        private readonly GameFlowManager _gameFlowManager;
+        private readonly EnemyPositions _enemyPositions;
+        private readonly Character _character;
+        private readonly Transform _worldTransform;
+        private readonly Transform _container;
+        private readonly Enemy _prefab;
+        private readonly Queue<Enemy> _enemyPool = new();
 
         private bool _isPaused;
-
-        private readonly Queue<GameObject> _enemyPool = new();
         
+        private const int ENEMY_COUNT = 7;
+
+        public EnemyPool(GameFlowManager gameFlowManager,
+            EnemyPositions enemyPositions,
+            Character character,
+            Transform worldTransorm,
+            Enemy prefab,
+            EnemiesContainer container)
+        {
+            _gameFlowManager = gameFlowManager;
+            _enemyPositions = enemyPositions;
+            _character = character;
+            _worldTransform = worldTransorm;
+            _prefab = prefab;
+            _container = container.Container;
+        }
+
         public void AwakeObj()
         {
-            for (var i = 0; i < _enemyCount; i++)
+            for (var i = 0; i < ENEMY_COUNT; i++)
             {
-                var enemy = Instantiate(_prefab, _container);
+                var enemy = Object.Instantiate(_prefab, _container);
                 _enemyPool.Enqueue(enemy);
             }
         }
 
-        public bool TrySpawnEnemy(out GameObject enemy)
+        public bool TrySpawnEnemy(out Enemy enemy)
         {
             if(_isPaused)
             {
@@ -61,10 +61,11 @@ namespace ShootEmUp
             enemy.transform.position = spawnPosition.position;
             
             var attackPosition = _enemyPositions.RandomAttackPosition();
-            var moveAgent = enemy.GetComponent<EnemyMoveAgent>();
-            var attackAgent = enemy.GetComponent<EnemyAttackAgent>();
+            EnemyMoveAgent moveAgent = new(enemy.MoveComponent, enemy.transform);
+            EnemyAttackAgent attackAgent = new(enemy.gameObject, enemy.WeaponComponent, moveAgent, enemy.Countdown);
             moveAgent.SetDestination(attackPosition.position);
             attackAgent.SetTarget(_character);
+            enemy.AttackAgent = attackAgent;
             _gameFlowManager.AddPausebleObj(moveAgent);
             _gameFlowManager.AddPausebleObj(attackAgent);
             _gameFlowManager.AddFixedUpdatebleObj(moveAgent);
@@ -72,7 +73,7 @@ namespace ShootEmUp
             return true;
         }
 
-        public void UnspawnEnemy(GameObject enemy)
+        public void UnspawnEnemy(Enemy enemy)
         {
             enemy.transform.SetParent(_container);
             _enemyPool.Enqueue(enemy);

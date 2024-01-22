@@ -1,9 +1,10 @@
 using UnityEngine;
 using GameFlow;
+using Zenject;
 
 namespace ShootEmUp
 {
-    public sealed class WeaponComponent : MonoBehaviour, IAwake
+    public sealed class WeaponComponent : MonoBehaviour
     {
         public Vector2 Position
         {
@@ -20,14 +21,15 @@ namespace ShootEmUp
 
         private BulletSystem _bulletSystem;
 
+        [Inject]
+        private void Constract(BulletSystem bulletSystem)
+        {
+            _bulletSystem = bulletSystem;
+        }
+
         public void Fire(Args bulletArgs)
         {
             _bulletSystem.FlyBulletByArgs(bulletArgs);
-        }
-
-        public void AwakeObj()
-        {
-            _bulletSystem = FindObjectOfType<BulletSystem>();
         }
     }
 }

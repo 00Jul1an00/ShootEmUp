@@ -2,22 +2,28 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using GameFlow;
+using Zenject;
 
 namespace ShootEmUp
 {
-    public sealed class EnemyManager : MonoBehaviour, IStart
+    public sealed class EnemyManager : IStart
     {
-        [SerializeField]
-        private EnemyPool _enemyPool;
+        private readonly EnemyPool _enemyPool;
+        private readonly BulletSystem _bulletSystem;
+        private readonly ICoroutineStarter _coroutiner;
 
-        [SerializeField]
-        private BulletSystem _bulletSystem;
+        private readonly HashSet<Enemy> _activeEnemies = new();
 
-        private readonly HashSet<GameObject> _activeEnemies = new();
+        public EnemyManager(BulletSystem bulletSystem, EnemyPool pool, ICoroutineStarter coroutineStarter)
+        {
+            _bulletSystem = bulletSystem;
+            _enemyPool = pool;
+            _coroutiner = coroutineStarter;
+        }
 
         public void StartObj()
         {
-            StartCoroutine(SpawnCoroutine());
+            _coroutiner.CoroutineStarter.StartCoroutine(SpawnCoroutine());
         }
 
         private IEnumerator SpawnCoroutine()
@@ -30,8 +36,8 @@ namespace ShootEmUp
                 {
                     if (_activeEnemies.Add(enemy))
                     {
-                        var hpComponent = enemy.GetComponent<HitPointsComponent>();
-                        var attackAgent = enemy.GetComponent<EnemyAttackAgent>();
+                        var hpComponent = enemy.HitPointsComponent;
+                        var attackAgent = enemy.AttackAgent;
                         hpComponent.HpIsEmpty += OnDestroyed;
                         attackAgent.OnFire += OnFire;
                     }
@@ -39,12 +45,14 @@ namespace ShootEmUp
             }
         }
 
-        private void OnDestroyed(GameObject enemy)
+        private void OnDestroyed(GameObject enemyGO)
         {
+            var enemy = enemyGO.GetComponent<Enemy>();
+
             if (_activeEnemies.Remove(enemy))
             {
-                enemy.GetComponent<HitPointsComponent>().HpIsEmpty -= OnDestroyed;
-                enemy.GetComponent<EnemyAttackAgent>().OnFire -= OnFire;
+                enemy.HitPointsComponent.HpIsEmpty -= OnDestroyed;
+                enemy.AttackAgent.OnFire -= OnFire;
 
                 _enemyPool.UnspawnEnemy(enemy);
             }

@@ -155,7 +155,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _firePoint: {fileID: 3926786963072264220}
-  _bulletSystem: {fileID: 0}
 --- !u!114 &3926786964091724597
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -198,6 +197,7 @@ MonoBehaviour:
   _weapon: {fileID: 3926786964091724598}
   _mover: {fileID: 3926786963732877808}
   _bulletConfig: {fileID: 11400000, guid: 7138ae5d32d814e0ca50c616c65ea105, type: 2}
+  <HitPointsComponent>k__BackingField: {fileID: 3926786964091724599}
 --- !u!1 &3926786963072264211
 GameObject:
   m_ObjectHideFlags: 0

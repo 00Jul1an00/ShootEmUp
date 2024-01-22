@@ -8,6 +8,8 @@ namespace ShootEmUp
         [SerializeField] private MoveComponent _mover;
         [SerializeField] private BulletConfig _bulletConfig;
 
+        [field: SerializeField] public HitPointsComponent HitPointsComponent { get; private set; }
+
         public void Move(Vector2 velocity)
         {
             _mover.MoveByRigidbodyVelocity(velocity);

@@ -1,21 +1,27 @@
+using GameFlow;
 using System;
 using UnityEngine;
+using Zenject;
 
 namespace ShootEmUp
 {
-    public class OnCharacterKilledObserver : MonoBehaviour
+    public class OnCharacterKilledObserver : IEnable, IDisable
     {
-        [SerializeField] private HitPointsComponent _characterHitPoints;
-        [SerializeField] private GameManager _gameManager;
+        private HitPointsComponent _characterHitPoints;
 
         public event Action PlayerDied;
 
-        private void OnEnable()
+        public OnCharacterKilledObserver(HitPointsComponent characterHitPoints)
+        {
+            _characterHitPoints = characterHitPoints;
+        }
+
+        public void Enable()
         {
             _characterHitPoints.HpIsEmpty += OnHpIsEmpty;
         }
 
-        private void OnDisable()
+        public void Disable()
         {
             _characterHitPoints.HpIsEmpty -= OnHpIsEmpty;
         }

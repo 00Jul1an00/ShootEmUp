@@ -4,25 +4,24 @@ using GameFlow;
 
 namespace ShootEmUp
 {
-    public sealed class BulletSystem : MonoBehaviour, IAwake, IFixedUpdate, IPause, IResume
+    public sealed class BulletSystem : IFixedUpdate, IPause, IResume
     {
-        [SerializeField]
-        private int _initialCount = 50;
-
-        [SerializeField] private Transform _container;
-        [SerializeField] private Bullet _prefab;
-        [SerializeField] private Transform _worldTransform;
-        [SerializeField] private LevelBounds _levelBounds;
-        [SerializeField] private GameFlowManager _gameFlowManager;
+        private readonly LevelBounds _levelBounds;
+        private readonly List<Bullet> _cache = new();
+        private readonly BulletPool _bulletPool;
 
         private bool _isPaused;
 
-        private BulletPool _bulletPool;
-        private readonly List<Bullet> _cache = new();
-
-        public void AwakeObj()
+        private const int INITIAL_COUNT = 50;
+        
+        public BulletSystem(BulletContainer container, 
+            Bullet bulletPrefab, 
+            Transform worldTransform, 
+            LevelBounds levelBounds, 
+            GameFlowManager gameFlowManager)
         {
-            _bulletPool = new(_initialCount, _prefab, _container, _worldTransform, OnBulletCollision, _gameFlowManager);
+            _levelBounds = levelBounds;
+            _bulletPool = new(INITIAL_COUNT, bulletPrefab, container.Container, worldTransform, OnBulletCollision, gameFlowManager);
         }
 
         public void FixedUpdateObj()

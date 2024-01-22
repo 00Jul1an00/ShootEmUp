@@ -1,6 +1,7 @@
 using ShootEmUp;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
 namespace GameFlow
 {
@@ -8,20 +9,19 @@ namespace GameFlow
     {
         [Header("TestHelper")]
         [SerializeField] private HelpersButtons _helpersButtons;
-        
-        [Space(20)]
-        [SerializeField] private GameManager _gameManager;
-        [SerializeField] private OnCharacterKilledObserver _onCharacterKilledObserver;
+       
+        private GameManager _gameManager;
+        private OnCharacterKilledObserver _onCharacterKilledObserver;
 
-        private List<IAwake> _awaikebles = new();
-        private List<IStart> _startable = new();
-        private List<IDisable> _disailables = new();
-        private List<IEnable> _enables = new();
-        private List<IFixedUpdate> _fixedUpdatbles = new();
-        private List<IUpdate> _updatbles = new();
-        private List<IPause> _pausebles = new();
-        private List<IResume> _resumebles = new();
-        private List<IFinishGame> _finishables = new();
+        private readonly List<IAwake> _awaikebles = new();
+        private readonly List<IStart> _startable = new();
+        private readonly List<IDisable> _disailables = new();
+        private readonly List<IEnable> _enables = new();
+        private readonly List<IFixedUpdate> _fixedUpdatbles = new();
+        private readonly List<IUpdate> _updatbles = new();
+        private readonly List<IPause> _pausebles = new();
+        private readonly List<IResume> _resumebles = new();
+        private readonly List<IFinishGame> _finishables = new();
 
         private void Init()
         {
@@ -35,6 +35,35 @@ namespace GameFlow
             _helpersButtons.AddResumeButtonListiner(Resume);
             _onCharacterKilledObserver.PlayerDied += GameFinished;
             FillupLists(transform);
+        }
+
+        [Inject]
+        private void Contract(GameManager manager, OnCharacterKilledObserver onCharacterKilledObserver)
+        {
+            _gameManager = manager;
+            _onCharacterKilledObserver = onCharacterKilledObserver;
+        }
+
+        [Inject]
+        private void InjectFlowInterfaces(List<IAwake> awakebles,
+            List<IStart> starts,
+            List<IDisable> disables,
+            List<IEnable> enables,
+            List<IFixedUpdate> fixedUpdates,
+            List<IUpdate> updates,
+            List<IPause> pauses,
+            List<IResume> resumes,
+            List<IFinishGame> finishables)
+        {
+            _awaikebles.AddRange(awakebles);
+            _startable.AddRange(starts);
+            _disailables.AddRange(disables);
+            _enables.AddRange(enables);
+            _fixedUpdatbles.AddRange(fixedUpdates);
+            _updatbles.AddRange(updates);
+            _pausebles.AddRange(pauses);
+            _resumebles.AddRange(resumes);
+            _finishables.AddRange(finishables);
         }
 
         private void FillupLists(Transform transform)

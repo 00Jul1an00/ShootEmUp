@@ -3,19 +3,26 @@ using GameFlow;
 
 namespace ShootEmUp
 {
-    public sealed class EnemyMoveAgent : MonoBehaviour, IFixedUpdate, IPause, IResume
+    public sealed class EnemyMoveAgent : IFixedUpdate, IPause, IResume
     {
         public bool IsReached
         {
             get { return _isReached; }
         }
 
-        [SerializeField] private MoveComponent _moveComponent;
+        private readonly MoveComponent _moveComponent;
+        private readonly Transform _transform;
 
         private Vector2 _destination;
 
         private bool _isReached;
         private bool _isPaused;
+
+        public EnemyMoveAgent(MoveComponent moveComponent, Transform enemyTransform)
+        {
+            _moveComponent = moveComponent;
+            _transform = enemyTransform;
+        }
 
         public void SetDestination(Vector2 endPoint)
         {
@@ -30,7 +37,7 @@ namespace ShootEmUp
                 return;
             }
 
-            var vector = _destination - (Vector2)transform.position;
+            var vector = _destination - (Vector2)_transform.position;
 
             if (vector.magnitude <= 0.25f)
             {

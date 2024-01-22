@@ -3,11 +3,16 @@ using GameFlow;
 
 namespace ShootEmUp
 {
-    public sealed class CharacterController : MonoBehaviour, IEnable, IDisable, IFixedUpdate, IPause, IResume
+    public sealed class CharacterController : IEnable, IDisable, IFixedUpdate, IPause, IResume
     {
-        [SerializeField] private GameManager _gameManager;
-        [SerializeField] private InputManager _inputManager;
-        [SerializeField] private Character _character;
+        private readonly InputManager _inputManager;
+        private readonly Character _character;
+
+        public CharacterController(InputManager inputManager, Character character)
+        {
+            _inputManager = inputManager;
+            _character = character;
+        }
 
         private bool _isPaused;
 
